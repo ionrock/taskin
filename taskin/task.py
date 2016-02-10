@@ -50,7 +50,7 @@ class MapTask(object):
             for item in data:
                 yield item
         else:
-             yield data
+            yield data
 
     def __call__(self, data):
         return self.pool.map(self.task, self.iter_input(data))
