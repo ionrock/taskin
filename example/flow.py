@@ -38,11 +38,11 @@ def dig_it(data):
 myflow = [
     foo,
     task.IfTask(check, [bar], [baz]),
-    task.MapTask([
+    task.MapTask(dig_it, [
         'ionrock.org',
         'google.com',
         'rackspace.com',
-    ], dig_it),
+    ]),
     finish,
 ]
 

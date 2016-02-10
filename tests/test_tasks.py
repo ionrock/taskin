@@ -41,9 +41,11 @@ class TestMapTask(object):
     def setup(self):
         self.args = range(3)
         self.pool = Mock()
-        self.task = task.MapTask(self.args, add, self.pool)
+        self.task = task.MapTask(add, self.args, self.pool)
 
     def test_iter_input(self):
+        args = list(range(3))
+        self.task = task.MapTask(add, args, self.pool)
         iter_input = self.task.iter_input('foo')
 
         assert list(iter_input) == [
@@ -51,6 +53,15 @@ class TestMapTask(object):
             ('foo', 1),
             ('foo', 2),
         ]
+
+    def test_iter_input_on_empty_args_iterates_on_input(self):
+        self.task = task.MapTask(add, pool=self.pool)
+        data = [0, 2, 3]
+        assert list(self.task.iter_input(data)) == data
+
+    def test_iter_input_does_not_iterate_on_string(self):
+        self.task = task.MapTask(add, pool=self.pool)
+        assert list(self.task.iter_input('foo')) == ['foo']
 
     def test_calls_map_on_pool(self):
         self.task.iter_input = Mock()
