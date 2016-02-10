@@ -6,7 +6,7 @@ def add(x):
     return x + 1
 
 
-class TestDoFlow(object):
+class TestFlow(object):
 
     def test_uses_iterator_with_callables(self):
 
@@ -14,10 +14,10 @@ class TestDoFlow(object):
             for i in range(3):
                 yield add
 
-        assert task.do_flow(tasks(), 1) == 4
+        assert task.Flow(tasks(), 1)() == 4
 
     def test_use_single_task(self):
-        assert task.do_flow(lambda x: x, 'foo') == 'foo'
+        assert task.Flow(lambda x: x, 'foo')() == 'foo'
 
 
 class TestPools(object):

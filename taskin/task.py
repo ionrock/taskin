@@ -2,14 +2,30 @@ import multiprocessing
 import multiprocessing.dummy
 from multiprocessing import cpu_count
 
+from pprint import pformat
 
-def do_flow(flow, result=None):
-    if callable(flow):
-        return flow(result)
 
-    for item in flow:
-        result = item(result)
-    return result
+class Flowable(object):
+
+    def flow(self, flow, state=None):
+        flow = Flow(flow, state)
+        return flow()
+
+
+class Flow(object):
+
+    def __init__(self, flow, state=None):
+        self.flow = flow
+        self.state = state or {}
+
+    def __call__(self, state=None):
+        state = state or self.state
+        if callable(self.flow):
+            return self.flow(state)
+        else:
+            for task in self.flow:
+                state = task(state)
+            return state
 
 
 class BasePool(object):
@@ -31,11 +47,7 @@ class ProcessPool(BasePool):
         self.pool = multiprocessing.Pool(self.size)
 
 
-class MapTask(object):
-
-    pool_types = [
-        'thread', 'process'
-    ]
+class MapTask(Flowable):
 
     def __init__(self, task, args_iterator, pool=None):
         self.args = args_iterator
@@ -47,18 +59,17 @@ class MapTask(object):
             yield item
 
     def __call__(self, data):
-        return self.pool.map(self.task, self.iter_input(data))
+        return self.pool.map(
+            self.task, self.iter_input(data)
+        )
 
 
-class IfTask(object):
+class IfTask(Flowable):
 
     def __init__(self, check, a, else_case=None):
         self.check = check
         self.a = a
         self.b = else_case
-
-    def flow(self, *args, **kw):
-        return do_flow(*args, **kw)
 
     def __call__(self, data):
         if self.check(data):
@@ -75,7 +86,19 @@ class DispatchTask(object):
     def __init__(self, dispatcher):
         self.dispatcher = dispatcher
 
-
     def __call__(self, data):
         task = self.dispatcher(data)
+        if not task:
+            return data
         return task(data)
+
+
+class ReduceTask(Flowable):
+
+    def __init__(self, reducer, flow_or_task):
+        self.reducer = reducer
+        self.flow_or_task = flow_or_task
+
+    def __call__(self, data):
+        new_state = self.flow(self.flow_or_task, data)
+        return self.reducer(new_state, data)
