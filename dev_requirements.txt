@@ -1,0 +1,7 @@
+-e .
+
+sphinx
+pytest
+pytest-cov
+mock
+bumpversion
