@@ -37,7 +37,6 @@ class TestPools(object):
         assert isinstance(pool, task.BasePool)
 
 
-
 class TestMapTask(object):
 
     def setup(self):
@@ -46,7 +45,10 @@ class TestMapTask(object):
         self.task = task.MapTask(add, self.args, self.pool)
 
     def test_iter_input(self):
-        args = list(range(3))
+        def args(data):
+            for i in range(3):
+                yield (data, i)
+
         self.task = task.MapTask(add, args, self.pool)
         iter_input = self.task.iter_input('foo')
 
@@ -56,20 +58,9 @@ class TestMapTask(object):
             ('foo', 2),
         ]
 
-    def test_iter_input_on_empty_args_iterates_on_input(self):
-        self.task = task.MapTask(add, pool=self.pool)
-        data = [0, 2, 3]
-        assert list(self.task.iter_input(data)) == data
-
-    def test_iter_input_does_not_iterate_on_string(self):
-        self.task = task.MapTask(add, pool=self.pool)
-        assert list(self.task.iter_input('foo')) == ['foo']
-
     def test_calls_map_on_pool(self):
         self.task.iter_input = Mock()
-
         self.task('foo')
-
         self.pool.map.assert_called_with(add, self.task.iter_input())
 
     def test_map_task_uses_thread_pool_default(self):

@@ -37,23 +37,14 @@ class MapTask(object):
         'thread', 'process'
     ]
 
-    def __init__(self, task, args=None, pool=None):
-        self.args = args
+    def __init__(self, task, args_iterator, pool=None):
+        self.args = args_iterator
         self.task = task
         self.pool = pool or ThreadPool()
 
     def iter_input(self, data):
-        if self.args:
-            for args in self.args:
-                if not isinstance(args, (tuple, list)):
-                    args = [args]
-                yield tuple([data] + args)
-
-        elif not isinstance(data, basestring):
-            for item in data:
-                yield item
-        else:
-            yield data
+        for item in self.args(data):
+            yield item
 
     def __call__(self, data):
         return self.pool.map(self.task, self.iter_input(data))
