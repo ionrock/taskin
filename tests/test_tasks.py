@@ -56,7 +56,11 @@ class TestIfTask(object):
         self.task.flow.assert_called_with(self.b, False)
 
     def test_no_else(self):
-        mytask = IfTask(self.check, lambda x: 'a')
+        def return_a(data):
+            print('Data: %s' % data)
+            return 'a'
+
+        mytask = IfTask(self.check, return_a)
         assert mytask(True) == 'a'
 
 

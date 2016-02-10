@@ -1,4 +1,4 @@
-from taskin.task import MapTask, ReduceTask, Flow
+from taskin import MapReduceTask, Flow
 from pprint import pprint
 import random
 
@@ -84,19 +84,17 @@ def create_status_reducer(new, state):
 
 create_flow = Flow([
     find_targets_and_nameservers,
-
-    ReduceTask(create_reducer,
-               MapTask(create_zone_on_target, find_targets)),
-
-    ReduceTask(verification_reducer,
-               MapTask(verify_zone_on_ns, find_ns))
+    MapReduceTask(find_targets, create_zone_on_target, create_reducer),
+    MapReduceTask(find_ns, verify_zone_on_ns, verification_reducer)
 ])
 
 recovery_flow = Flow([
     find_errored_zones,
-    ReduceTask(create_status_reducer,
-               MapTask(create_flow, find_create_errors))
+    MapReduceTask(
+        find_create_errors,
+        create_flow,
+        create_status_reducer
+    )
 ])
-
 
 pprint(recovery_flow({'zone': 'example.net.'}))

@@ -1,21 +1,21 @@
+import time
 import multiprocessing
-import multiprocessing.dummy
+
+from concurrent import futures
 
 
 class BasePool(object):
-    def map(self, *args, **kw):
-        return self.pool.map(*args, **kw)
-
-
-class ThreadPool(BasePool):
-
-    def __init__(self, size=20):
-        self.size = size
-        self.pool = multiprocessing.dummy.Pool(self.size)
+    def map(self, f, iterator):
+        return self.executor.map(f, iterator)
 
 
 class ProcessPool(BasePool):
-
     def __init__(self, size=None):
         self.size = size or multiprocessing.cpu_count()
-        self.pool = multiprocessing.Pool(self.size)
+        self.executor = futures.ProcessPoolExecutor(size)
+
+
+class ThreadPool(BasePool):
+    def __init__(self, size=None):
+        self.size = size or 20
+        self.executor = futures.ThreadPoolExecutor(self.size)
