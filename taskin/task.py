@@ -1,5 +1,5 @@
-from multiprocessing import Pool as ProcessPool
-from multiprocessing.dummy import Pool as ThreadPool
+import multiprocessing
+import multiprocessing.dummy
 from multiprocessing import cpu_count
 
 
@@ -10,23 +10,26 @@ def do_flow(flow, result=None):
     return result
 
 
-class PoolAPI(object):
+class BasePool(object):
     def map(self, *args, **kw):
         return self.pool.map(*args, **kw)
 
 
-class ThreadPool(PoolAPI):
+class ThreadPool(BasePool):
 
     def __init__(self, size=20):
         self.size = size
-        self.pool = ThreadPool(self.size)
+        self.pool = multiprocessing.dummy.Pool(self.size)
 
 
-class ProcessPool(PoolAPI):
+Pool = ThreadPool
+
+
+class ProcessPool(BasePool):
 
     def __init__(self, size=None):
         self.size = size or cpu_count()
-        self.pool = ProcessPool(self.size)
+        self.pool = multiprocessing.Pool(self.size)
 
 
 class MapTask(object):
@@ -57,7 +60,10 @@ class IfTask(object):
         self.a = a
         self.b = b
 
+    def flow(self, *args, **kw):
+        return do_flow(*args, **kw)
+
     def __call__(self, input):
-        if check(input):
-            return do_flow(self.a, input)
-        return do_flow(self.b, input)
+        if self.check(input):
+            return self.flow(self.a, input)
+        return self.flow(self.b, input)
