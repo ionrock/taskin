@@ -39,14 +39,14 @@ class MapTask(object):
         self.task = task
         self.pool = pool or ThreadPool()
 
-    def iter_input(self, input):
+    def iter_input(self, data):
         for args in self.args:
             if not isinstance(args, (tuple, list)):
                 args = [args]
-            yield tuple([input] + args)
+            yield tuple([data] + args)
 
-    def __call__(self, input):
-        return self.pool.map(self.task, self.iter_input(input))
+    def __call__(self, data):
+        return self.pool.map(self.task, self.iter_input(data))
 
 
 class IfTask(object):
@@ -59,7 +59,18 @@ class IfTask(object):
     def flow(self, *args, **kw):
         return do_flow(*args, **kw)
 
-    def __call__(self, input):
-        if self.check(input):
-            return self.flow(self.a, input)
-        return self.flow(self.b, input)
+    def __call__(self, data):
+        if self.check(data):
+            return self.flow(self.a, data)
+        return self.flow(self.b, data)
+
+
+class DispatchTask(object):
+
+    def __init__(self, dispatcher):
+        self.dispatcher = dispatcher
+
+
+    def __call__(self, data):
+        task = self.dispatcher(data)
+        return task(data)
