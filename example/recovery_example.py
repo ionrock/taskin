@@ -1,4 +1,4 @@
-from taskin.task import MapTask, ReduceTask, Flow
+from taskin import MapTask, ReduceTask, Flow
 from pprint import pprint
 import random
 
