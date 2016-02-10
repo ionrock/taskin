@@ -64,6 +64,11 @@ class TestMapTask(object):
 
         self.pool.map.assert_called_with(add, self.task.iter_input())
 
+    def test_map_task_uses_thread_pool_default(self):
+        task = MapTask(self.args, add)
+
+        assert isinstance(task.pool, ThreadPool)
+
 
 class TestIfTask(object):
 

@@ -5,7 +5,6 @@ from multiprocessing import cpu_count
 
 def do_flow(flow, result=None):
     for item in flow:
-        print(item, result)
         result = item(result)
     return result
 
@@ -22,9 +21,6 @@ class ThreadPool(BasePool):
         self.pool = multiprocessing.dummy.Pool(self.size)
 
 
-Pool = ThreadPool
-
-
 class ProcessPool(BasePool):
 
     def __init__(self, size=None):
@@ -38,10 +34,10 @@ class MapTask(object):
         'thread', 'process'
     ]
 
-    def __init__(self, args, task, pool):
+    def __init__(self, args, task, pool=None):
         self.args = args
         self.task = task
-        self.pool = pool
+        self.pool = pool or ThreadPool()
 
     def iter_input(self, input):
         for args in self.args:
