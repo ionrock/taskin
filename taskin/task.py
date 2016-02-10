@@ -4,6 +4,9 @@ from multiprocessing import cpu_count
 
 
 def do_flow(flow, result=None):
+    if callable(flow):
+        return flow(result)
+
     for item in flow:
         result = item(result)
     return result
@@ -58,10 +61,10 @@ class MapTask(object):
 
 class IfTask(object):
 
-    def __init__(self, check, a, b):
+    def __init__(self, check, a, else_case=None):
         self.check = check
         self.a = a
-        self.b = b
+        self.b = else_case
 
     def flow(self, *args, **kw):
         return do_flow(*args, **kw)
@@ -69,7 +72,11 @@ class IfTask(object):
     def __call__(self, data):
         if self.check(data):
             return self.flow(self.a, data)
-        return self.flow(self.b, data)
+        else:
+            if self.b:
+                return self.flow(self.b, data)
+            else:
+                return data
 
 
 class DispatchTask(object):

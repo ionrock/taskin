@@ -1,4 +1,3 @@
-import pytest
 from mock import Mock
 from taskin import task
 
@@ -16,6 +15,9 @@ class TestDoFlow(object):
                 yield add
 
         assert task.do_flow(tasks(), 1) == 4
+
+    def test_use_single_task(self):
+        assert task.do_flow(lambda x: x, 'foo') == 'foo'
 
 
 class TestPools(object):
@@ -92,6 +94,10 @@ class TestIfTask(object):
     def test_false_returns_b(self):
         self.task(False)
         self.task.flow.assert_called_with(self.b, False)
+
+    def test_no_else(self):
+        mytask = task.IfTask(self.check, lambda x: 'a')
+        assert mytask(True) == 'a'
 
 
 class TestDispatchTask(object):
