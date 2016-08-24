@@ -45,7 +45,7 @@ myflow = [
     MapTask(dig_it, [
         'ionrock.org',
         'google.com',
-        'rackspace.com',
+        'yahoo.com',
     ]),
     finish,
 ]

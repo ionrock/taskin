@@ -58,10 +58,7 @@ coverage:
 docs:
 	rm -f docs/taskin.rst
 	rm -f docs/modules.rst
-	source $(VENV)/bin/activate
-	sphinx-apidoc -o docs/ taskin
-	$(MAKE) -f docs/Makefile -C docs clean
-	$(MAKE) -f docs/Makefile -C docs html
+	. $(VENV)/bin/activate && cd docs && make html
 	open docs/_build/html/index.html
 
 release: clean
