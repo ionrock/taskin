@@ -62,7 +62,11 @@ Here is an example:
 
   myflow = [
       foo,
-      IfTask(check, [bar], [baz]),
+      IfTask(
+          check,
+          [bar],
+          [baz]
+      ),
       MapTask(dig_it, [
           'ionrock.org',
           'google.com',
