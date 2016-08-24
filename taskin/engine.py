@@ -1,8 +1,7 @@
 class Flowable(object):
 
     def flow(self, flow, state=None):
-        flow = Flow(flow, state)
-        return flow()
+        return do_flow(flow, state)
 
 
 class Flow(object):

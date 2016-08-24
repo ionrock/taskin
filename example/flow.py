@@ -1,5 +1,8 @@
-from taskin import task
 import subprocess
+
+from pprint import pprint
+
+from taskin import IfTask, MapTask, do_flow
 
 
 def foo(data):
@@ -19,26 +22,27 @@ def baz(data):
 
 
 def finish(data):
+    result = {}
+
     for i in data:
-        print('%s, %s' % i)
-    print('Done!')
+        zone, ips = i
+        result[zone] = ips
 
-    return data
+    return result
 
 
-def dig_it(data):
-    data, zone = data
+def dig_it(zone):
     cmd = 'dig +short %s' % zone
     print('running: %s' % cmd.strip())
 
-    ip = subprocess.check_output(cmd.split()).strip()
-    return (data, ip)
+    ips = subprocess.check_output(cmd.split()).strip().split('\n')
+    return (zone, ips)
 
 
 myflow = [
     foo,
-    task.IfTask(check, [bar], [baz]),
-    task.MapTask(dig_it, [
+    IfTask(check, [bar], [baz]),
+    MapTask(dig_it, [
         'ionrock.org',
         'google.com',
         'rackspace.com',
@@ -48,9 +52,9 @@ myflow = [
 
 
 def main():
-    print(task.do_flow(myflow))
-
+    results = do_flow(myflow, {})
+    pprint(results)
+    print('Done')
 
 if __name__ == '__main__':
-
     main()

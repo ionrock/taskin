@@ -1,5 +1,5 @@
-from .engine import Flowable
 from .pools import ThreadPool
+from .engine import Flowable
 
 
 class MapTask(Flowable):
@@ -10,8 +10,12 @@ class MapTask(Flowable):
         self.pool = pool or ThreadPool()
 
     def iter_input(self, data):
-        for item in self.args(data):
-            yield item
+        if callable(self.args):
+            for item in self.args(data):
+                yield item
+        else:
+            for item in self.args:
+                yield item
 
     def __call__(self, data):
         return self.pool.map(
@@ -28,7 +32,8 @@ class IfTask(Flowable):
 
     def __call__(self, data):
         if self.check(data):
-            return self.flow(self.a, data)
+            result = self.flow(self.a, data)
+            return result
         else:
             if self.b:
                 return self.flow(self.b, data)
@@ -57,3 +62,15 @@ class ReduceTask(Flowable):
     def __call__(self, data):
         new_state = self.flow(self.flow_or_task, data)
         return self.reducer(new_state, data)
+
+
+class MapReduceTask(Flowable):
+
+    def __init__(self, items, mapper, reducer):
+        self.items = items
+        self.mapper = mapper
+        self.reducer = reducer
+
+    def __call__(self, data):
+        maptask = MapTask(self.mapper, self.items)
+        return self.flow([ReduceTask(self.reducer, maptask)], data)

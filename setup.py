@@ -11,7 +11,7 @@ except ImportError:
 readme = open('README.rst').read()
 
 requirements = [
-    # TODO: put package requirements here
+    "futures",
 ]
 
 setup(
