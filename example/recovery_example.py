@@ -47,7 +47,7 @@ def create_zone_on_target(state):
 
 
 def create_reducer(new, state):
-    state['creates'] = new
+    state['creates'] = list(new)
     return state
 
 
@@ -78,7 +78,7 @@ def find_create_errors(state):
 
 def create_status_reducer(new, state):
     for i, item in enumerate(new):
-        state['create_status_%s' % i] = item
+        state['create_status_%s' % i] = list(item)
     return state
 
 
@@ -93,7 +93,7 @@ recovery_flow = Flow([
     MapReduceTask(
         find_create_errors,
         create_flow,
-        create_status_reducer
+        create_status_reducer,
     )
 ])
 
