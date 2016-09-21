@@ -1,4 +1,3 @@
-import time
 import multiprocessing
 
 from concurrent import futures
